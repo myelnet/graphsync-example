@@ -34,7 +34,7 @@ Another important concept is that of IPLD selectors. **IPLD Selectors** are expr
 
 ![https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true](https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true)
 
-
+**Note**: the CID of a root node uniquely identifies not just that node, but the *entire* DAG of which it’s the root! For more details as to why see [here](https://proto.school/merkle-dags/05). 
 
 ### Graphsync ? 
 
