@@ -138,9 +138,9 @@ There's a lot to unpack there so let's run through it line by line.
 - `MutexWrap`: creates a simple API for Querying, Putting, Reading etc... elements from key-value datastores. We now have a **datastore**. 
 - `NewGCBlockstore`: our data is structured as blocks, each with an associated CID (see the IPLD definition of a block above), and we need a simple interface for putting and getting these special objects from a datastore. This is what `NewGCBlockstore` provides. We now have a **blockstore**. 
 -  `LinkSystemForBlockstore`: If you recall, a crucial component of IPLD DAGs  are *links*, which point from one DAG node to another (they make a DAG a DAG and not just a tree or some random soup of blocks). We need a way to manage these links on top of our blockstore, which is what `LinkSystemForBlockstore` provides. We can now **store IPLD DAGs** ! 
-- `NewDAGService`: Is just an interface for putting and putting DAG nodes and Links. 
+- `NewDAGService`: Is just an interface for putting and getting DAG nodes and Links. 
 
-So we now have a simple interface for storing our DAGs ! 
+We now have a simple interface for storing our DAGs. 
 
 Let's create some random data and commit it to our blockstore. 
 
@@ -221,7 +221,7 @@ exchange.RegisterIncomingRequestHook(func(p peer.ID, request graphsync.RequestDa
 })
 ```
 
-That's all the code we need for the listener node ! 
+That's all the code we need for the listener node !
 
 ### Making Graphsync Requests
 
@@ -265,7 +265,7 @@ took := time.Since(start)
 fmt.Printf("transfer took %s (%d bps)\n", took, int(float64(dataSize)/took.Seconds()))
 ```
 
-`sel.All()` is an IPLD selector (see above), which specifies that we want to retrieve the entire DAG ! 
+`sel.All()` is an IPLD selector (see above), which specifies that we want to retrieve the entire DAG. 
 
 ### Running listeners and requesters
 
