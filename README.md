@@ -29,6 +29,7 @@ Data, specified using IPLD, is represented as a graph, specifically a [Directed 
 - Path Segment: A path segment is a piece of information that describes a move from one Node to a directly connected child Node.  (In other words, a Path Segment is either a map key or a list index.)
 - Path: A path is composed of Path Segments, thereby describing a traversal from one Node to another Node somewhere deeper in the DAG.
 
+
 Another important concept is that of IPLD selectors. IPLD Selectors are expressions that identify ("select") a subset of nodes in an IPLD dag. Visually ([source](https://github.com/ipld/specs/blob/master/selectors/selectors.md)): 
 
 ![https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true](https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true)
@@ -55,11 +56,14 @@ go-graphsync also depends on the following external dependencies:
 1. A network implementation, which provides basic functions for sending and receiving messages on a network.
 2. A local blockstore implementation, expressed by an IPLD `LinkSystem` (to store the DAGs !)
 
-These concepts will be critical as we work our way through the example. Note that Graphsync requests can include a selector for a specific sub-graph within an IPLD DAG -- allowing for clients to specifically retrieve the pieces of data that are relevant to them !
+Note that Graphsync requests can include a selector for a specific sub-graph within an IPLD DAG -- allowing for clients to specifically retrieve the pieces of data that are relevant to them !
 
-### Insantiating our Graphsync network interfaces 
+These concepts will be critical as we work our way through the example.
 
-We're going to create a script, which depending on the passed arguments create a local node that acts as a listener, awaiting Graphsync requests, or creates a local requesting node, which sends out requests for content. This can be done simply: 
+### Instantiating our Graphsync network interfaces 
+
+We're going to create a script, which depending on the passed arguments, creates a local node that acts as a listener, awaiting Graphsync requests, or creates a local requesting node, which sends out requests for content. This can be done simply: 
+
 
 ```go
 func main() {
@@ -68,7 +72,7 @@ func main() {
 // ... 
 ```
 
-As we mentioned above, Libp2p is the foundational interface that we're going to use for networking, and transporting data between listening and requesting peers. We use the Libp2p default transports (TCP websockets) and instantiate a new node as such: 
+As we mentioned above, Libp2p is the foundational interface that we're going to use for networking. We use the Libp2p default transports (TCP websockets) and initialize a new node: 
 
 ```go
   // default transport is Websockets
@@ -85,7 +89,7 @@ As we mentioned above, Libp2p is the foundational interface that we're going to 
 	h, err := libp2p.New(opts...)
 ```
 
-As mentioned above, Libp2p assigns a unique `peerID` to each peer on the network. This can be accessed as such: 
+As mentioned above, Libp2p assigns a unique `peerID` to each peer on the network.
 
 ```go
   // print the host peer ID / multi-address
@@ -94,7 +98,8 @@ As mentioned above, Libp2p assigns a unique `peerID` to each peer on the network
 	}
 ```
 
-Given that Libp2p serves as the backbone of our p2p networking, we can use this to instantiate our Graphsync network interface, which if you recall provides basic functions for sending and receiving Graphsync requests / responses on a network. We can instantiate this interface directly from our Libp2p host ! 
+Given that Libp2p serves as the backbone of our p2p networking, we can use this to instantiate our Graphsync network interface, which if you recall provides basic functions for sending and receiving Graphsync requests / responses on a network. 
+
 
 ```go
   // graphsync network interface
@@ -103,7 +108,7 @@ Given that Libp2p serves as the backbone of our p2p networking, we can use this 
 
 ### Instantiating our Graphsync requester/responder
 
-The Graphsync requester and responder interfaces are collectively wrapped into the Graphsync "exchange" in the `golang` implementation of Graphsync. This exchange sits on top of, and depends on the instantiation of, a blockstore expressed by an IPLD `LinkSystem` (to store the DAGs !). 
+The Graphsync requester and responder interfaces are collectively wrapped into the Graphsync "exchange" in the `golang` implementation of Graphsync. This exchange sits on top of, and depends on, a blockstore expressed by an IPLD `LinkSystem` (to store the DAGs !). 
 
 So the first thing we need to do is to instantiate this blockstore, populate it with data, and return a `LinkSystem` object that can be consumed by the exchange. We do this using the `CreateRandomBytes` function, called as such: 
 
@@ -116,7 +121,7 @@ This function takes in a `golang` context object and a data size integer, repres
 
 #### <u>CreateRandomBytes</u>:
 
-Within this function The first thing we do is instantiate this blockstore and an associated IPLD `LinkSystem` : 
+Within this function the first thing we do is instantiate the blockstore and an associated IPLD `LinkSystem` : 
 
 ```go
 func CreateRandomBytes(ctx context.Context, dataSize int) ipld.LinkSystem {
@@ -132,7 +137,7 @@ There's a lot to unpack there so let's run through it line by line.
 
 - `MutexWrap`: creates a simple API for Querying, Putting, Reading etc... elements from key-value datastores. We now have a **datastore**. 
 - `NewGCBlockstore`: our data is structured as blocks, each with an associated CID (see the IPLD definition of a block above), and we need a simple interface for putting and getting these special objects from a datastore. This is what `NewGCBlockstore` provides. We now have a **blockstore**. 
--  `LinkSystemForBlockstore`: If you recall, a crucial component of IPLD DAGs  are *links*, which point from one DAG node to another (they make a DAG a DAG and not just a tree, or some random soup of blocks). We need a way to manage these links on top of our blockstore, which is what `LinkSystemForBlockstore` provides. We can now **store IPLD DAGs** ! 
+-  `LinkSystemForBlockstore`: If you recall, a crucial component of IPLD DAGs  are *links*, which point from one DAG node to another (they make a DAG a DAG and not just a tree or some random soup of blocks). We need a way to manage these links on top of our blockstore, which is what `LinkSystemForBlockstore` provides. We can now **store IPLD DAGs** ! 
 - `NewDAGService`: Is just an interface for putting and putting DAG nodes and Links. 
 
 So we now have a simple interface for storing our DAGs ! 
@@ -163,7 +168,7 @@ Let's create some random data and commit it to our blockstore.
 	err = bufferedDS.Commit()
 ```
 
-Here we've instantiated an empty DAG buffer (in [UnixFS](https://github.com/ipfs/go-unixfs/) format, `NewBufferedDAG`), we've split our data into chunks  (`NewSizeSplitter`, its **best practice to split large files into multiple chunks**, each one a block in the DAG !), DAGified our chunks (`balanced.Layout`) then commited our DAG to the blockstore (`bufferedDS.Commit()`). 
+Here we've created an empty DAG buffer (in [UnixFS](https://github.com/ipfs/go-unixfs/) format, `NewBufferedDAG`), we've split our data into chunks  (`NewSizeSplitter`, its **best practice to split large files into multiple chunks**, each one a block in the DAG), DAGified our chunks (`balanced.Layout`) then commited our DAG to the blockstore (`bufferedDS.Commit()`). 
 
 `balanced.Layout` creates what is called a "balanced" DAG from the chunks of data, which are generalistic DAGs in which  all leaves (nodes representing chunks of data) are at the same distance from the root node in the DAG. Eg (for more details [source](https://github.com/ipfs/go-unixfs/blob/master/importer/balanced/builder.go)): 
 
@@ -197,14 +202,13 @@ We can print the Root CID, created by `balanced`:
 fmt.Printf("%s\n", nd.Cid().String())
 ```
 
-Finally the function returns the `LinkSystem`, which we need to instantiate our Graphsync exchange. 
+Finally the function returns the `LinkSystem` which we need to initialize our Graphsync exchange. 
 
 ```go
 return lsys
 }
 ```
-
-Returning to our `main()` function we can now instantiate our Graphsync exchange, using the `LinkSystem` populated with data. We also specify that our exchange should accept incoming requests by default ! 
+Returning to our `main()` function we can now initialize our Graphsync exchange, using the `LinkSystem` populated with data. We also specify that our exchange should accept incoming requests by default.
 
 ```go
 // create random bytes and populates a blockstore with them
@@ -222,7 +226,8 @@ That's all the code we need for the listener node !
 
 ### Making Graphsync Requests
 
-If we are not in listening mode, we want to be able to make requests to other nodes listening for inbound requests. We read in the peer we want to dial and the CID we are requesting as arguments to the go script. 
+If we are not in listening mode, we want to be able to make requests to other nodes listening for inbound requests. We read in the peer we want to dial and the CID we are requesting as arguments to `main.go`. 
+
 
 ```go
 if !listener {    
