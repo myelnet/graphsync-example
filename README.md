@@ -75,35 +75,35 @@ func main() {
 As we mentioned above, Libp2p is the foundational interface that we're going to use for networking. We use the Libp2p default transports (TCP websockets) and initialize a new node: 
 
 ```go
-  // default transport is Websockets
-	opts := []libp2p.Option{
-		libp2p.DefaultTransports,
-	}
+// default transport is Websockets
+opts := []libp2p.Option{
+  libp2p.DefaultTransports,
+}
 
-	// makes sure the listening node runs on a different port
-	if listener {
-		opts = append(opts, libp2p.ListenAddrStrings("/ip4/0.0.0.0/tcp/7878"))
-	}
+// makes sure the listening node runs on a different port
+if listener {
+  opts = append(opts, libp2p.ListenAddrStrings("/ip4/0.0.0.0/tcp/7878"))
+}
 
-	// create a new libp2p host
-	h, err := libp2p.New(opts...)
+// create a new libp2p host
+h, err := libp2p.New(opts...)
 ```
 
 As mentioned above, Libp2p assigns a unique `peerID` to each peer on the network.
 
 ```go
-  // print the host peer ID / multi-address
-	for _, m := range h.Addrs() {
-		fmt.Printf("%s/p2p/%s\n", m, h.ID())
-	}
+// print the host peer ID / multi-address
+for _, m := range h.Addrs() {
+  fmt.Printf("%s/p2p/%s\n", m, h.ID())
+}
 ```
 
 Given that Libp2p serves as the backbone of our p2p networking, we can use this to instantiate our Graphsync network interface, which if you recall provides basic functions for sending and receiving Graphsync requests / responses on a network. 
 
 
 ```go
-  // graphsync network interface
-	network := gsnet.NewFromLibp2pHost(h)
+// graphsync network interface
+network := gsnet.NewFromLibp2pHost(h)
 ```
 
 ### Instantiating our Graphsync requester/responder
@@ -113,8 +113,8 @@ The Graphsync requester and responder interfaces are collectively wrapped into t
 So the first thing we need to do is to instantiate this blockstore, populate it with data, and return a `LinkSystem` object that can be consumed by the exchange. We do this using the `CreateRandomBytes` function, called as such: 
 
 ``` go
-	// create random bytes and populates a blockstore with them
-	lsys := CreateRandomBytes(ctx, dataSize) 
+// create random bytes and populates a blockstore with them
+lsys := CreateRandomBytes(ctx, dataSize) 
 ```
 
 This function takes in a `golang` context object and a data size integer, representing the size of the random data (in bytes) that we want to generate and store. 
@@ -145,27 +145,27 @@ So we now have a simple interface for storing our DAGs !
 Let's create some random data and commit it to our blockstore. 
 
 ```go
-  // random data
-  data := make([]byte, dataSize)
-	_, err := rand.New(rand.NewSource(time.Now().UnixNano())).Read(data)
+// random data
+data := make([]byte, dataSize)
+_, err := rand.New(rand.NewSource(time.Now().UnixNano())).Read(data)
 
-	buf := bytes.NewReader(data)
-	file := files.NewReaderFile(buf)
+buf := bytes.NewReader(data)
+file := files.NewReaderFile(buf)
 
-	// import to UnixFS
-	bufferedDS := ipldformat.NewBufferedDAG(ctx, dagService)
+// import to UnixFS
+bufferedDS := ipldformat.NewBufferedDAG(ctx, dagService)
 
-	params := ihelper.DagBuilderParams{
-		Maxlinks:   1024,
-		RawLeaves:  true,
-		CidBuilder: nil,
-		Dagserv:    bufferedDS,
-	}
+params := ihelper.DagBuilderParams{
+  Maxlinks:   1024,
+  RawLeaves:  true,
+  CidBuilder: nil,
+  Dagserv:    bufferedDS,
+}
 
-	// split data into 1024000 bytes size chunks then DAGify it
-	db, err := params.New(chunker.NewSizeSplitter(file, int64(1024000)))
-	nd, err := balanced.Layout(db)
-	err = bufferedDS.Commit()
+// split data into 1024000 bytes size chunks then DAGify it
+db, err := params.New(chunker.NewSizeSplitter(file, int64(1024000)))
+nd, err := balanced.Layout(db)
+err = bufferedDS.Commit()
 ```
 
 Here we've created an empty DAG buffer (in [UnixFS](https://github.com/ipfs/go-unixfs/) format, `NewBufferedDAG`), we've split our data into chunks  (`NewSizeSplitter`, its **best practice to split large files into multiple chunks**), DAGified our chunks (`balanced.Layout`) then commited our DAG to the blockstore (`bufferedDS.Commit()`). 
@@ -206,20 +206,19 @@ Finally the function returns the `LinkSystem` which we need to initialize our Gr
 
 ```go
 return lsys
-}
 ```
 Returning to our `main()` function we can now initialize our Graphsync exchange, using the `LinkSystem` populated with data. We also specify that our exchange should accept incoming requests by default.
 
 ```go
 // create random bytes and populates a blockstore with them
-	lsys := CreateRandomBytes(ctx, dataSize)
+lsys := CreateRandomBytes(ctx, dataSize)
 
-	exchange := gsimpl.New(ctx, network, lsys)
+exchange := gsimpl.New(ctx, network, lsys)
 
-	// automatically validate incoming requests for content
-	exchange.RegisterIncomingRequestHook(func(p peer.ID, request graphsync.RequestData, hookActions graphsync.IncomingRequestHookActions) {
-		hookActions.ValidateRequest()
-	})
+// automatically validate incoming requests for content
+exchange.RegisterIncomingRequestHook(func(p peer.ID, request graphsync.RequestData, hookActions graphsync.IncomingRequestHookActions) {
+  hookActions.ValidateRequest()
+})
 ```
 
 That's all the code we need for the listener node ! 
@@ -231,40 +230,39 @@ If we are not in listening mode, we want to be able to make requests to other no
 
 ```go
 if !listener {    
-   // read in peer to dial
-		ai, err := peer.AddrInfoFromString(os.Args[1])
-		if err != nil {
-			panic(err)
-		}
-		// read in cid to request
-		cid1, err := cid.Decode(os.Args[2])
-		if err != nil {
-			panic(err)
-		}
+ // read in peer to dial
+  ai, err := peer.AddrInfoFromString(os.Args[1])
+  if err != nil {
+    panic(err)
+  }
+  // read in cid to request
+  cid1, err := cid.Decode(os.Args[2])
+  if err != nil {
+    panic(err)
+  }
+  //...
 ```
 
 We then make sure the peer is dialable
 
 ```go
-    // dial peer
-		if err := h.Connect(ctx, *ai); err != nil {
-			panic(err)
-		} 
+// dial peer
+if err := h.Connect(ctx, *ai); err != nil {
+  panic(err)
+} 
 ```
 
 We can now ask the peer for that CID and measure the time the response takes.  
 
 ```go
-    start := time.Now()
-		// request peer for CID
-		responses, _ := exchange.Request(ctx, ai.ID, cidlink.Link{cid1}, sel.All())
-		// iterate until empty response
-		for range responses {
-		}
-		took := time.Since(start)
-    fmt.Printf("transfer took %s (%d bps)\n", took, int(float64(dataSize)/took.Seconds()))
-		return
-	}
+start := time.Now()
+// request peer for CID
+responses, _ := exchange.Request(ctx, ai.ID, cidlink.Link{cid1}, sel.All())
+// iterate until empty response
+for range responses {
+}
+took := time.Since(start)
+fmt.Printf("transfer took %s (%d bps)\n", took, int(float64(dataSize)/took.Seconds()))
 ```
 
 `sel.All()` is an IPLD selector (see above), which specifies that we want to retrieve the entire DAG ! 
