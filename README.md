@@ -30,7 +30,7 @@ Data, specified using IPLD, is represented as a graph, specifically a [Directed 
 - Path: A path is composed of Path Segments, thereby describing a traversal from one Node to another Node somewhere deeper in the DAG.
 
 
-Another important concept is that of IPLD selectors. IPLD Selectors are expressions that identify ("select") a subset of nodes in an IPLD dag. Visually ([source](https://github.com/ipld/specs/blob/master/selectors/selectors.md)): 
+Another important concept is that of IPLD selectors. **IPLD Selectors** are expressions that identify ("select") a subset of nodes in an IPLD dag. Visually ([source](https://github.com/ipld/specs/blob/master/selectors/selectors.md)): 
 
 ![https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true](https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true)
 
