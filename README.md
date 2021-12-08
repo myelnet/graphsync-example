@@ -168,9 +168,9 @@ Let's create some random data and commit it to our blockstore.
 	err = bufferedDS.Commit()
 ```
 
-Here we've created an empty DAG buffer (in [UnixFS](https://github.com/ipfs/go-unixfs/) format, `NewBufferedDAG`), we've split our data into chunks  (`NewSizeSplitter`, its **best practice to split large files into multiple chunks**, each one a block in the DAG), DAGified our chunks (`balanced.Layout`) then commited our DAG to the blockstore (`bufferedDS.Commit()`). 
+Here we've created an empty DAG buffer (in [UnixFS](https://github.com/ipfs/go-unixfs/) format, `NewBufferedDAG`), we've split our data into chunks  (`NewSizeSplitter`, its **best practice to split large files into multiple chunks**), DAGified our chunks (`balanced.Layout`) then commited our DAG to the blockstore (`bufferedDS.Commit()`). 
 
-`balanced.Layout` creates what is called a "balanced" DAG from the chunks of data, which are generalistic DAGs in which  all leaves (nodes representing chunks of data) are at the same distance from the root node in the DAG. Eg (for more details [source](https://github.com/ipfs/go-unixfs/blob/master/importer/balanced/builder.go)): 
+`balanced.Layout` creates what is called a "balanced" DAG from the chunks of data, which are generalistic DAGs in which all leaves (nodes representing chunks of data) are at the same distance from the root node in the DAG. Eg (for more details [source](https://github.com/ipfs/go-unixfs/blob/master/importer/balanced/builder.go)): 
 
 ```
 //                                                 +-------------+
