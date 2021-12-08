@@ -271,7 +271,7 @@ fmt.Printf("transfer took %s (%d bps)\n", took, int(float64(dataSize)/took.Secon
 
 The code in its entirety can be found in `main.go`
 
-- To run a listening node run `go run main.go` . This will print our the listener's peer ID and the CID of the random DAG we've created. 
+- To run a listening node run `go run main.go` . This will print out the listener's peer ID and the CID of the random DAG we've created. 
 - Open a new terminal window and copy paste that peer ID and CID as arguments to `main.go` for instance: 
 
 ```bash
