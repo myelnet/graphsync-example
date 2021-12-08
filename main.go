@@ -31,21 +31,20 @@ import (
 	sel "github.com/myelnet/pop/selectors"
 )
 
-func CreateRandomBytes(ctx context.Context) ipld.LinkSystem {
+func CreateRandomBytes(ctx context.Context, dataSize int) ipld.LinkSystem {
 
 	// create blockstore
 	ds := dss.MutexWrap(datastore.NewMapDatastore())
 	bs := blockstore.NewGCBlockstore(blockstore.NewBlockstore(ds), blockstore.NewGCLocker())
 	lsys := storeutil.LinkSystemForBlockstore(bs)
+	dagService := merkledag.NewDAGService(blockservice.New(bs, offline.Exchange(bs)))
 
 	// random data
-	data := make([]byte, 104857600)
+	data := make([]byte, dataSize)
 	_, err := rand.New(rand.NewSource(time.Now().UnixNano())).Read(data)
 
 	buf := bytes.NewReader(data)
 	file := files.NewReaderFile(buf)
-
-	dagService := merkledag.NewDAGService(blockservice.New(bs, offline.Exchange(bs)))
 
 	// import to UnixFS
 	bufferedDS := ipldformat.NewBufferedDAG(ctx, dagService)
@@ -73,6 +72,8 @@ func CreateRandomBytes(ctx context.Context) ipld.LinkSystem {
 }
 
 func main() {
+
+	dataSize := 104857600
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -106,7 +107,7 @@ func main() {
 	network := gsnet.NewFromLibp2pHost(h)
 
 	// create random bytes and populates a blockstore with them
-	lsys := CreateRandomBytes(ctx)
+	lsys := CreateRandomBytes(ctx, dataSize)
 
 	exchange := gsimpl.New(ctx, network, lsys)
 
@@ -141,7 +142,7 @@ func main() {
 		}
 		took := time.Since(start)
 
-		fmt.Printf("transfer took %s (%d bps)\n", took, int(float64(104857600)/took.Seconds()))
+		fmt.Printf("transfer took %s (%d bps)\n", took, int(float64(dataSize)/took.Seconds()))
 		return
 	}
 

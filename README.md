@@ -29,7 +29,8 @@ Data, specified using IPLD, is represented as a graph, specifically a [Directed 
 - Path Segment: A path segment is a piece of information that describes a move from one Node to a directly connected child Node.  (In other words, a Path Segment is either a map key or a list index.)
 - Path: A path is composed of Path Segments, thereby describing a traversal from one Node to another Node somewhere deeper in the DAG.
 
-Another important concept is that of IPLD selectors. IPLD selectors are expressions that identify ("select") a subset of nodes in an IPLD dag. Visually ([source](https://github.com/ipld/specs/blob/master/selectors/selectors.md)): 
+
+Another important concept is that of IPLD selectors. IPLD Selectors are expressions that identify ("select") a subset of nodes in an IPLD dag. Visually ([source](https://github.com/ipld/specs/blob/master/selectors/selectors.md)): 
 
 ![https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true](https://github.com/ipld/specs/blob/master/selectors/selectors.jpg?raw=true)
 
@@ -62,6 +63,7 @@ These concepts will be critical as we work our way through the example.
 ### Instantiating our Graphsync network interfaces 
 
 We're going to create a script, which depending on the passed arguments, creates a local node that acts as a listener, awaiting Graphsync requests, or creates a local requesting node, which sends out requests for content. This can be done simply: 
+
 
 ```go
 func main() {
@@ -97,6 +99,7 @@ As mentioned above, Libp2p assigns a unique `peerID` to each peer on the network
 ```
 
 Given that Libp2p serves as the backbone of our p2p networking, we can use this to instantiate our Graphsync network interface, which if you recall provides basic functions for sending and receiving Graphsync requests / responses on a network. 
+
 
 ```go
   // graphsync network interface
@@ -165,7 +168,7 @@ Let's create some random data and commit it to our blockstore.
 	err = bufferedDS.Commit()
 ```
 
-Here we've instantiated an empty DAG buffer (in [UnixFS](https://github.com/ipfs/go-unixfs/) format, `NewBufferedDAG`), we've split our data into chunks  (`NewSizeSplitter`, its **best practice to split large files into multiple chunks**, each one a block in the DAG), DAGified our chunks (`balanced.Layout`) then commited our DAG to the blockstore (`bufferedDS.Commit()`). 
+Here we've created an empty DAG buffer (in [UnixFS](https://github.com/ipfs/go-unixfs/) format, `NewBufferedDAG`), we've split our data into chunks  (`NewSizeSplitter`, its **best practice to split large files into multiple chunks**, each one a block in the DAG), DAGified our chunks (`balanced.Layout`) then commited our DAG to the blockstore (`bufferedDS.Commit()`). 
 
 `balanced.Layout` creates what is called a "balanced" DAG from the chunks of data, which are generalistic DAGs in which  all leaves (nodes representing chunks of data) are at the same distance from the root node in the DAG. Eg (for more details [source](https://github.com/ipfs/go-unixfs/blob/master/importer/balanced/builder.go)): 
 
@@ -205,7 +208,6 @@ Finally the function returns the `LinkSystem` which we need to initialize our Gr
 return lsys
 }
 ```
-
 Returning to our `main()` function we can now initialize our Graphsync exchange, using the `LinkSystem` populated with data. We also specify that our exchange should accept incoming requests by default.
 
 ```go
@@ -225,6 +227,7 @@ That's all the code we need for the listener node !
 ### Making Graphsync Requests
 
 If we are not in listening mode, we want to be able to make requests to other nodes listening for inbound requests. We read in the peer we want to dial and the CID we are requesting as arguments to `main.go`. 
+
 
 ```go
 if !listener {    
